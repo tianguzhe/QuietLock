@@ -129,7 +129,8 @@ docs/                       Icon and screenshots (en/, zh-Hans/)
 
 ## Changelog
 
-- **1.4** — English and Simplified Chinese UI that follows the system language. Authorize once per launch, revoked on quit. Prominent status callout with a one-click screen saver fix. Accepts string-typed `idleTime` values. Keeps external-change warnings when the panel opens.
+- **1.4.1** — English and Simplified Chinese UI that follows the system language; the app name is QuietLock.
+- **1.4** — Authorize once per launch, revoked on quit. Prominent status callout with a one-click screen saver fix. Accepts string-typed `idleTime` values. Keeps external-change warnings when the panel opens.
 - **1.3** — Compact fixed-size 344 × 420 pt panel with an in-panel guide.
 - **1.2** — Automatic screen saver switch; native keep-awake for ∞; periodic and wake-time sync.
 - **1.1** — Original Q-clock icon, glacier-teal glass design and haptic slider.
