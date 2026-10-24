@@ -114,7 +114,8 @@ public struct SystemPowerSettingsService: PowerSettingsServing {
             """
         }
         try await runWithAdministratorPrompt(command,
-            prompt: "静锁需要授权一次，本次运行期间调整熄屏时间不再询问密码。")
+            prompt: localized("QuietLock needs your permission once. It won't ask again until you quit.",
+                               "静锁需要授权一次，本次运行期间调整熄屏时间不再询问密码。"))
         await launch.grant()
     }
 

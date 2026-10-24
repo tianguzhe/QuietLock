@@ -62,10 +62,10 @@ public final class PowerSettingsModel: ObservableObject {
             isSnapshotCurrent = true
             if previous != nil && previous != actual {
                 if previous?.preset == .never {
-                    feedback = SettingsFeedback(kind: .error, message: "系统熄屏时间已改变，“永不”已停止。可重试恢复。")
+                    feedback = SettingsFeedback(kind: .error, message: localized("Display sleep was changed elsewhere, so Never stopped. Retry to restore it.", "系统熄屏时间已改变，“永不”已停止。可重试恢复。"))
                     retryAction = .apply(.never)
                 } else {
-                    feedback = SettingsFeedback(kind: .neutral, message: "系统熄屏时间已改变，已同步实际设置。")
+                    feedback = SettingsFeedback(kind: .neutral, message: localized("Display sleep was changed elsewhere. Showing the new value.", "系统熄屏时间已改变，已同步实际设置。"))
                     retryAction = nil
                 }
             } else if retryAction == .read || (!preservingFeedback && !hasPendingWriteRetry) {
@@ -77,7 +77,7 @@ public final class PowerSettingsModel: ObservableObject {
         } catch {
             guard revision == requestRevision else { return }
             isSnapshotCurrent = false
-            feedback = SettingsFeedback(kind: .error, message: "无法读取当前设置，请重试。")
+            feedback = SettingsFeedback(kind: .error, message: localized("Couldn't read the current settings. Try again.", "无法读取当前设置，请重试。"))
             retryAction = .read
         }
         isRefreshing = false
@@ -93,7 +93,7 @@ public final class PowerSettingsModel: ObservableObject {
         isRefreshing = false
         isApplying = true
         retryAction = nil
-        feedback = SettingsFeedback(kind: .neutral, message: "请在系统弹窗中允许修改…")
+        feedback = SettingsFeedback(kind: .neutral, message: localized("Approve the change in the system dialog…", "请在系统弹窗中允许修改…"))
 
         var writeError: Error?
         do { try await service.apply(preset) } catch { writeError = error }
@@ -108,26 +108,28 @@ public final class PowerSettingsModel: ObservableObject {
 
         isApplying = false
         if !isSnapshotCurrent {
-            feedback = SettingsFeedback(kind: .error, message: "暂时无法确认当前设置，请重新读取。")
+            feedback = SettingsFeedback(kind: .error, message: localized("Couldn't confirm the current setting. Reload to check.", "暂时无法确认当前设置，请重新读取。"))
             retryAction = .read
         } else if let error = writeError {
             if (error as? PowerSettingsError) == .authorizationCancelled {
-                feedback = SettingsFeedback(kind: .neutral, message: "已取消授权，当前系统设置如下。")
+                feedback = SettingsFeedback(kind: .neutral, message: localized("Authorization cancelled. Showing the current setting.", "已取消授权，当前系统设置如下。"))
                 retryAction = nil
             } else if snapshot?.uniformMinutes == preset.rawValue {
-                feedback = SettingsFeedback(kind: .neutral, message: "已同步，系统当前已是所选时间。")
+                feedback = SettingsFeedback(kind: .neutral, message: localized("Already set to the selected time.", "已同步，系统当前已是所选时间。"))
                 retryAction = nil
             } else {
-                feedback = SettingsFeedback(kind: .error, message: "修改未完成，已显示实际设置。")
+                feedback = SettingsFeedback(kind: .error, message: localized("The change didn't finish. Showing the actual setting.", "修改未完成，已显示实际设置。"))
                 retryAction = .apply(preset)
             }
         } else if snapshot?.uniformMinutes == preset.rawValue {
             feedback = SettingsFeedback(
                 kind: .success,
-                message: preset == .never ? "已设置为永不自动熄屏" : "已设置为闲置 \(preset.rawValue) 分钟后熄屏"
+                message: preset == .never
+                    ? localized("Display never sleeps when idle", "已设置为永不自动熄屏")
+                    : localized("Display sleeps after \(preset.rawValue) min idle", "已设置为闲置 \(preset.rawValue) 分钟后熄屏")
             )
         } else {
-            feedback = SettingsFeedback(kind: .error, message: "系统未完整应用修改，请重试。")
+            feedback = SettingsFeedback(kind: .error, message: localized("macOS didn't fully apply the change. Try again.", "系统未完整应用修改，请重试。"))
             retryAction = .apply(preset)
         }
         if isSnapshotCurrent { synchronizeProtection() }
@@ -158,12 +160,12 @@ public final class PowerSettingsModel: ObservableObject {
             guard protection.isActive else { throw IdleSleepProtectionError.unavailable }
             isKeepingAwake = true
             if retryAction == .protection {
-                feedback = SettingsFeedback(kind: .success, message: "保持唤醒已开启。")
+                feedback = SettingsFeedback(kind: .success, message: localized("Keep-awake is on.", "保持唤醒已开启。"))
                 retryAction = nil
             }
         } catch {
             isKeepingAwake = false
-            feedback = SettingsFeedback(kind: .error, message: "熄屏定时已关闭，但保持唤醒未开启，请重试。")
+            feedback = SettingsFeedback(kind: .error, message: localized("Display sleep is off, but keep-awake didn't start. Try again.", "熄屏定时已关闭，但保持唤醒未开启，请重试。"))
             retryAction = .protection
         }
     }

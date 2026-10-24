@@ -14,7 +14,7 @@ struct TimeDial: View {
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(isPreviewing ? "预览时长" : "闲置后熄屏")
+                Text(isPreviewing ? localized("Preview", "预览时长") : localized("Display sleeps after", "闲置后熄屏"))
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(QuietLockStyle.secondaryText(colorScheme))
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -23,7 +23,7 @@ struct TimeDial: View {
                         .tracking(minutes == 0 ? 0 : -2)
                         .monospacedDigit()
                         .contentTransition(reduceMotion ? .identity : .numericText())
-                    Text(minutes == 0 ? "永不" : minutes == nil ? "选择档位" : "分钟")
+                    Text(minutes == 0 ? localized("never", "永不") : minutes == nil ? localized("pick a step", "选择档位") : localized("min", "分钟"))
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(QuietLockStyle.secondaryText(colorScheme))
                 }
@@ -36,8 +36,9 @@ struct TimeDial: View {
         .animation(QuietLockStyle.animation(reduceMotion: reduceMotion), value: fraction)
         .animation(QuietLockStyle.animation(reduceMotion: reduceMotion), value: minutes)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("闲置熄屏时间")
-        .accessibilityValue(minutes.map { $0 == 0 ? "永不自动熄屏" : "\($0) 分钟" } ?? "当前时间未统一或不可用")
+        .accessibilityLabel(localized("Display sleep timer", "闲置熄屏时间"))
+        .accessibilityValue(minutes.map { $0 == 0 ? localized("Never sleeps", "永不自动熄屏") : localized("\($0) minutes", "\($0) 分钟") }
+            ?? localized("Mixed or unavailable", "当前时间未统一或不可用"))
     }
 
     private var orbit: some View {

@@ -146,8 +146,8 @@ struct RenderPreviews {
         NSColor(red: 0.055, green: 0.075, blue: 0.11, alpha: 1).setFill()
         NSRect(x: 0, y: 0, width: 752, height: 500).fill()
         for (name, x, title) in [
-            ("quietlock-dark-compact", CGFloat(24), "深色 · 344 × 420pt"),
-            ("quietlock-compact", CGFloat(384), "浅色 · 344 × 420pt")
+            ("quietlock-dark-compact", CGFloat(24), localized("Dark · 344 × 420 pt", "深色 · 344 × 420pt")),
+            ("quietlock-compact", CGFloat(384), localized("Light · 344 × 420 pt", "浅色 · 344 × 420pt"))
         ] {
             NSAttributedString(string: title, attributes: [
                 .font: NSFont.systemFont(ofSize: 11, weight: .medium),
@@ -176,21 +176,21 @@ struct RenderPreviews {
                 .draw(at: NSPoint(x: x, y: y))
         }
         let labelColor = NSColor(red: 0.58, green: 0.66, blue: 0.75, alpha: 1)
-        label("01 / 深色", x: 32, y: sheetSize.height - 39, font: .systemFont(ofSize: 10, weight: .medium), color: labelColor)
-        label("02 / 浅色", x: 408, y: sheetSize.height - 39, font: .systemFont(ofSize: 10, weight: .medium), color: labelColor)
-        label("03 / 原创图标", x: 800, y: sheetSize.height - 39, font: .systemFont(ofSize: 10, weight: .medium), color: labelColor)
+        label(localized("01 / Dark", "01 / 深色"), x: 32, y: sheetSize.height - 39, font: .systemFont(ofSize: 10, weight: .medium), color: labelColor)
+        label(localized("02 / Light", "02 / 浅色"), x: 408, y: sheetSize.height - 39, font: .systemFont(ofSize: 10, weight: .medium), color: labelColor)
+        label(localized("03 / Original icon", "03 / 原创图标"), x: 800, y: sheetSize.height - 39, font: .systemFont(ofSize: 10, weight: .medium), color: labelColor)
         for (name, x) in [("quietlock-dark-compact", CGFloat(32)), ("quietlock-compact", CGFloat(408))] {
             let panelImage = NSImage(contentsOf: directory.appendingPathComponent("\(name).png"))!
             let size = sizes[name]!
             panelImage.draw(in: NSRect(x: x, y: sheetSize.height - 60 - size.height, width: size.width, height: size.height))
         }
-        let iconURL = directory.deletingLastPathComponent().appendingPathComponent("AppIcon.iconset/icon_512x512@2x.png")
+        let iconURL = URL(fileURLWithPath: ".build/AppIcon.iconset/icon_512x512@2x.png")
         if let icon = NSImage(contentsOf: iconURL) {
             icon.draw(in: NSRect(x: 794, y: sheetSize.height - 328, width: 278, height: 278))
         }
         label("Q × CLOCK", x: 885, y: sheetSize.height - 359,
               font: .monospacedSystemFont(ofSize: 10, weight: .medium), color: labelColor)
-        label("状态栏 · 实际 18pt", x: 810, y: sheetSize.height - 418,
+        label(localized("Menu bar · actual 18 pt", "状态栏 · 实际 18pt"), x: 810, y: sheetSize.height - 418,
               font: .systemFont(ofSize: 10), color: labelColor)
 
         for (isDark, x) in [(false, CGFloat(800)), (true, CGFloat(940))] {
@@ -209,7 +209,7 @@ struct RenderPreviews {
             cg.setLineJoin(.round)
             cg.strokePath()
             cg.restoreGState()
-            label("静锁", x: bar.minX + 49, y: bar.midY - 7, font: .systemFont(ofSize: 11, weight: .medium), color: color)
+            label(localized("QuietLock", "静锁"), x: bar.minX + 49, y: bar.midY - 7, font: .systemFont(ofSize: 11, weight: .medium), color: color)
         }
         image.unlockFocus()
         let bitmap = NSBitmapImageRep(data: image.tiffRepresentation!)!

@@ -24,11 +24,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         NSApp.setActivationPolicy(.accessory)
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
-            button.image = QuietLockBrand.statusImage()
-            button.toolTip = "静锁 QuietLock · 自动锁屏时间"
+            let image = QuietLockBrand.statusImage()
+            image.accessibilityDescription = localized("QuietLock: adjust display sleep", "静锁：调整自动锁屏时间")
+            button.image = image
+            button.toolTip = localized("QuietLock · Display sleep timer", "静锁 QuietLock · 自动锁屏时间")
             button.target = self
             button.action = #selector(togglePopover)
-            button.setAccessibilityLabel("静锁，自动锁屏时间")
+            button.setAccessibilityLabel(localized("QuietLock, display sleep timer", "静锁，自动锁屏时间"))
         }
 
         popover.behavior = .transient

@@ -13,4 +13,6 @@ xcrun swiftc -parse-as-library -target arm64-apple-macosx14.0 \
     QuietLock/PresetSlider.swift QuietLock/ScreenSaverControls.swift QuietLock/QuietLockPanel.swift \
     Tools/RenderPreviews.swift "$QUIETLOCK_PRODUCTS/QuietLockCore.o" \
     -o .build/RenderPreviews
-.build/RenderPreviews "$QUIETLOCK_ROOT/.build/previews"
+# One set per UI language; -AppleLanguages overrides the system preference for this process.
+.build/RenderPreviews "$QUIETLOCK_ROOT/.build/previews/en" -AppleLanguages '(en)'
+.build/RenderPreviews "$QUIETLOCK_ROOT/.build/previews/zh-Hans" -AppleLanguages '(zh-Hans)'

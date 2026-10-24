@@ -31,7 +31,6 @@ enum QuietLockBrand {
             return true
         }
         image.isTemplate = true
-        image.accessibilityDescription = "静锁：调整自动锁屏时间"
         return image
     }
 }

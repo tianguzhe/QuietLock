@@ -24,7 +24,7 @@ public final class SystemIdleSleepProtection: IdleSleepProtecting {
         let result = IOPMAssertionCreateWithName(
             kIOPMAssertionTypePreventUserIdleDisplaySleep as CFString,
             IOPMAssertionLevel(kIOPMAssertionLevelOn),
-            "QuietLock · 永不闲置熄屏" as CFString,
+            localized("QuietLock · Never sleep display when idle", "QuietLock · 永不闲置熄屏") as CFString,
             &identifier
         )
         guard result == kIOReturnSuccess else { throw IdleSleepProtectionError.unavailable }

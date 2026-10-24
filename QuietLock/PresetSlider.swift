@@ -148,9 +148,10 @@ struct PresetSlider: View {
                     }
                 ), in: 0...5, step: 1)
                 .disabled(!isEnabled)
-                .accessibilityLabel("闲置熄屏时间")
-                .accessibilityValue(selection?.label ?? "当前为自定义或未统一设置")
-                .accessibilityHint("方向键预览，回车应用。VoiceOver 调整后请求系统授权。")
+                .accessibilityLabel(localized("Display sleep timer", "闲置熄屏时间"))
+                .accessibilityValue(selection?.label ?? localized("Custom or mixed setting", "当前为自定义或未统一设置"))
+                .accessibilityHint(localized("Arrow keys preview, Return applies. Adjusting asks for authorization.",
+                                              "方向键预览，回车应用。VoiceOver 调整后请求系统授权。"))
             }
             .animation(dragPosition == nil ? QuietLockStyle.animation(reduceMotion: reduceMotion) : nil, value: selection)
         }

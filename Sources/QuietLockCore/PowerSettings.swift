@@ -10,7 +10,7 @@ public enum LockPreset: Int, CaseIterable, Identifiable, Sendable {
 
     public var id: Int { rawValue }
     public var index: Int { Self.allCases.firstIndex(of: self)! }
-    public var label: String { self == .never ? "永不" : "\(rawValue) 分钟" }
+    public var label: String { self == .never ? localized("Never", "永不") : localized("\(rawValue) minutes", "\(rawValue) 分钟") }
     public var tickLabel: String { self == .never ? "∞" : String(rawValue) }
 }
 
@@ -21,8 +21,8 @@ public enum PowerSource: String, CaseIterable, Sendable {
 
     public var label: String {
         switch self {
-        case .battery: return "电池"
-        case .adapter: return "接电"
+        case .battery: return localized("Battery", "电池")
+        case .adapter: return localized("AC", "接电")
         case .ups: return "UPS"
         }
     }
@@ -56,7 +56,7 @@ public struct PowerSnapshot: Equatable, Sendable {
 
     public var detail: String {
         profiles.map { profile in
-            "\(profile.source.label) \(profile.minutes == 0 ? "永不" : "\(profile.minutes) 分钟")"
+            "\(profile.source.label) \(profile.minutes == 0 ? localized("never", "永不") : localized("\(profile.minutes) min", "\(profile.minutes) 分钟"))"
         }.joined(separator: " · ")
     }
 }
@@ -69,10 +69,10 @@ public enum PowerSettingsError: Error, LocalizedError, Equatable, Sendable {
 
     public var errorDescription: String? {
         switch self {
-        case .invalidOutput: return "暂时无法识别系统的电源设置。"
-        case .readFailed: return "无法读取系统设置，请重试。"
-        case .authorizationCancelled: return "已取消授权。"
-        case .writeFailed: return "未能完成修改，请重试并允许系统授权。"
+        case .invalidOutput: return localized("Couldn't recognize the system power settings.", "暂时无法识别系统的电源设置。")
+        case .readFailed: return localized("Couldn't read system settings. Try again.", "无法读取系统设置，请重试。")
+        case .authorizationCancelled: return localized("Authorization cancelled.", "已取消授权。")
+        case .writeFailed: return localized("Couldn't apply the change. Try again and allow authorization.", "未能完成修改，请重试并允许系统授权。")
         }
     }
 }

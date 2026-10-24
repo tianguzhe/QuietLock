@@ -12,9 +12,11 @@ public struct ScreenSaverSnapshot: Equatable, Sendable {
     }
 
     public var detail: String {
-        guard isEnabled else { return "已关闭闲置自动屏保" }
-        if idleSeconds % 60 == 0 { return "闲置 \(idleSeconds / 60) 分钟后开始" }
-        return "闲置 \(idleSeconds) 秒后开始"
+        guard isEnabled else { return localized("Idle screen saver is off", "已关闭闲置自动屏保") }
+        if idleSeconds % 60 == 0 {
+            return localized("Starts after \(idleSeconds / 60) min idle", "闲置 \(idleSeconds / 60) 分钟后开始")
+        }
+        return localized("Starts after \(idleSeconds) s idle", "闲置 \(idleSeconds) 秒后开始")
     }
 }
 
@@ -156,7 +158,7 @@ public final class ScreenSaverSettingsModel: ObservableObject {
         } catch {
             guard revision == request else { return }
             isCurrent = false
-            feedback = SettingsFeedback(kind: .error, message: "无法读取屏保设置，请重试。")
+            feedback = SettingsFeedback(kind: .error, message: localized("Couldn't read screen saver settings. Try again.", "无法读取屏保设置，请重试。"))
         }
         isRefreshing = false
     }
@@ -180,12 +182,13 @@ public final class ScreenSaverSettingsModel: ObservableObject {
         } catch { isCurrent = false }
         isApplying = false
         if !isCurrent {
-            feedback = SettingsFeedback(kind: .error, message: "无法确认屏保设置，请重新读取。")
+            feedback = SettingsFeedback(kind: .error, message: localized("Couldn't confirm screen saver settings. Reload to check.", "无法确认屏保设置，请重新读取。"))
         } else if writeError != nil || snapshot?.isEnabled != enabled {
-            feedback = SettingsFeedback(kind: .error, message: "屏保修改未完成，已显示实际状态。")
+            feedback = SettingsFeedback(kind: .error, message: localized("The screen saver change didn't finish. Showing the actual state.", "屏保修改未完成，已显示实际状态。"))
         } else {
             feedback = SettingsFeedback(kind: .success,
-                message: enabled ? "已恢复自动屏保。" : "已关闭自动屏保。")
+                message: enabled ? localized("Screen saver turned back on.", "已恢复自动屏保。")
+                    : localized("Screen saver turned off.", "已关闭自动屏保。"))
         }
     }
 }

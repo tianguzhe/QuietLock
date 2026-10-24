@@ -37,7 +37,7 @@ final class PowerSettingsParserTests: XCTestCase {
         let settings = try PowerSettingsParser.parse("Battery Power:\n displaysleep 5\nAC Power:\n displaysleep 15\n")
         XCTAssertNil(settings.uniformMinutes)
         XCTAssertNil(settings.preset)
-        XCTAssertEqual(settings.detail, "电池 5 分钟 · 接电 15 分钟")
+        XCTAssertEqual(settings.detail, localized("Battery 5 min · AC 15 min", "电池 5 分钟 · 接电 15 分钟"))
     }
 
     func testInvalidAndIncompleteOutputsAreRejected() {

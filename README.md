@@ -1,114 +1,135 @@
-# 静锁 QuietLock
+<div align="center">
 
-一个轻巧的原生 macOS 状态栏工具。点击菜单栏中的 Q 时钟图标，使用滑块快速设置 **1、5、10、15、30 分钟或永不** 自动熄屏。
+<img src="docs/QuietLock-icon.png" width="128" alt="QuietLock icon">
 
-1.1 版使用原创 Q 时钟图标、冰川青渐变与玻璃面板，时间环随档位流畅变化。拖动越过刻度时会有轻微触觉反馈；方向键和 VoiceOver 操作仍然可用。
+# QuietLock
 
-1.2 版增加“自动屏保”快捷开关：关闭闲置屏保，重新开启时恢复此前的等待时间（首次无记录时为 20 分钟）。屏保类型和密码要求保持原设置。“永不”同时开启运行期间的原生保持唤醒保护，并每 15 秒以及唤醒、解锁时同步实际设置。
+**A native macOS menu bar utility for display sleep and the screen saver.**
 
-1.3 版重做紧凑界面，固定为 **344 × 420pt**。横向时间卡片、六档滑块、自动屏保开关、错误重试、系统设置、刷新与退出均在首屏内；首次指引和保持唤醒提示复用固定状态区。右上角「ⓘ」可打开完整说明，切换页面不会改变面板高度。AppKit 托管视图和弹出窗口使用相同尺寸，避免首次展开或状态更新时裁切底部内容。
+Set when your Mac's display goes to sleep — 1, 5, 10, 15, 30 minutes or never — with a single slider, and switch the automatic screen saver on or off, right from the menu bar.
 
-1.4 版每次启动后只需授权一次，运行期间调整熄屏时间不再询问密码，退出时自动撤销；状态区改为醒目提示条，“永不”时若自动屏保仍开启可一键关闭；修复打开面板时丢失后台检测到的设置变更提示。
+[![Release](https://img.shields.io/github/v/release/tianguzhe/QuietLock?color=0a7b6b)](https://github.com/tianguzhe/QuietLock/releases/latest)
+![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-lightgrey)
+![Swift](https://img.shields.io/badge/Swift-SwiftUI-orange)
+![Architecture](https://img.shields.io/badge/arch-Apple%20Silicon%20%7C%20Intel-blue)
 
-## 使用
+**English** | [简体中文](README_CN.md)
 
-1. 打开 `dist/QuietLock.dmg`，将左侧 QuietLock 拖入右侧 Applications 文件夹，然后从“应用程序”打开静锁并推出磁盘映像。应用仅显示在菜单栏，不显示 Dock 图标。更新前请先退出旧版，再拖入并替换。
-2. 首次使用，点击“前往设置”，在系统“锁定屏幕”设置中将“屏幕保护程序启动或显示器关闭后，需要密码”设为“立即”。
-3. 拖动滑块后松手，或者直接点击刻度。每次启动静锁后的第一次修改需在 macOS 授权弹窗中输入管理员密码，本次运行期间之后的调整不再询问；退出后再打开会重新询问（见下方“免密调整”）。
-4. 显示“已设置”表示已读取系统值并验证成功。取消授权则重新显示实际设置。
-5. 想避免闲置自动锁屏时，除了选择“永不”，还应关闭面板中的“自动屏保”；屏保有独立的启动定时，即使显示器不自动关闭，屏保仍可能触发密码要求。开启开关会恢复此前的屏保等待时间。
+[**⬇ Download the latest DMG**](https://github.com/tianguzhe/QuietLock/releases/latest/download/QuietLock.dmg)
 
-方向键预览档位，Return 或空格应用，Esc 取消预览。也支持 VoiceOver 调整。
+<img src="docs/en/ui-preview.png" width="752" alt="QuietLock panel in dark and light appearance">
 
-**行为说明：**静锁调整的是系统的闲置熄屏时间，统一作用于电池、接电及受支持的 UPS。真正何时需要密码取决于系统锁屏设置。屏幕保护程序、播放视频或其他应用的保持唤醒请求也可能影响实际行为。“永不”关闭自动闲置熄屏定时，并不阻止手动锁屏、合盖、低电量睡眠或系统管理策略。退出静锁不会恢复此前的时间，修改会保留。
+</div>
 
-选择“永不”时，静锁还会持有 IOKit 的 `PreventUserIdleDisplaySleep` 断言，在运行期间防止屏幕及系统闲置睡眠。退出后释放断言，`pmset` 的熄屏定时和屏保开关仍会保留。系统值被改变时，静锁显示实际值并结束对应的保持唤醒，不会在后台反复覆盖用户或其他应用的新设置。读取失败时保留已有保护，直到能确认新状态。
+## Features
 
-自动屏保开关修改当前用户、当前 Mac 的 `com.apple.screensaver` 的 `idleTime`，写入后回读确认；不会更改密码策略，也不会退出正在运行的屏保或解锁系统。受组织管理的设置会禁用开关。自动测试及预览使用模拟服务，不会写入真实熄屏或屏保设置。
+- **Six-step slider** — 1, 5, 10, 15, 30 minutes or ∞ (never). Drag with live preview and haptic detents, or click a tick to apply.
+- **Applies to every power source** — battery, AC and supported UPS profiles are set together, then read back and verified.
+- **Never means never** — choosing ∞ also holds a native keep-awake assertion while QuietLock runs.
+- **Automatic screen saver switch** — turn the idle screen saver off; turning it back on restores your previous delay.
+- **Clear warnings** — if the screen saver could still lock your Mac while display sleep is set to never, the panel says so and offers a one-click fix.
+- **Stays in sync** — re-reads the real settings every 15 seconds and on wake or unlock, and reports changes made elsewhere instead of silently overwriting them.
+- **Authorize once per launch** — one administrator prompt per launch, no further prompts until you quit.
+- **English and Simplified Chinese** — the panel follows your preferred system language: Simplified Chinese shows Chinese; any other language shows English.
+- **Native and accessible** — SwiftUI with dark and light appearance, Reduce Motion and Reduce Transparency support, full keyboard control and VoiceOver.
+- **No dependencies** — a universal binary built with Apple frameworks only.
 
-## 构建
+## Screenshots
 
-需要 macOS 14+、Xcode 15+ 及其命令行工具，无第三方依赖。
+| Never, with a screen saver warning | Built-in guide |
+| :---: | :---: |
+| <img src="docs/en/quietlock-warning.png" width="344" alt="Warning shown when the screen saver can still lock the Mac"> | <img src="docs/en/quietlock-help.png" width="344" alt="Help page"> |
+
+## Installation
+
+1. Download [`QuietLock.dmg`](https://github.com/tianguzhe/QuietLock/releases/latest/download/QuietLock.dmg) from the [latest release](https://github.com/tianguzhe/QuietLock/releases/latest). A `.sha256` checksum is published alongside it.
+2. Open the disk image and drag **QuietLock** into **Applications**.
+3. Launch QuietLock from Applications. It lives in the menu bar only and has no Dock icon.
+
+> [!NOTE]
+> Release builds are ad-hoc signed and not notarized by Apple. On first launch macOS may block the app: right-click it and choose **Open**, or allow it under **System Settings → Privacy & Security**.
+
+To update, quit the running copy first, then replace it in Applications.
+
+## Usage
+
+1. Click the clock-shaped **Q** icon in the menu bar.
+2. **One-time setup:** click **Lock Screen** at the bottom of the panel and set *Require password after screen saver begins or display is turned off* to **Immediately**. QuietLock controls *when* the display sleeps; this system setting controls whether a password is then required.
+3. Drag the slider and release, or click a tick. The first change after each launch asks for an administrator password; later changes in the same session apply without a prompt.
+4. To avoid idle locking entirely, choose **∞** *and* turn off **Screen Saver**. The screen saver has its own idle timer and can still require a password.
+
+| Key | Action |
+| --- | --- |
+| <kbd>←</kbd> <kbd>→</kbd> | Preview the previous or next step |
+| <kbd>Return</kbd> / <kbd>Space</kbd> | Apply the previewed step |
+| <kbd>Esc</kbd> | Cancel the preview |
+
+## How it works
+
+| Control | System setting | Notes |
+| --- | --- | --- |
+| Time slider | `pmset -a displaysleep <minutes>` | Applied to all power sources, then re-read with `pmset -g custom`. |
+| ∞ (never) | `displaysleep 0` + IOKit `PreventUserIdleDisplaySleep` | The assertion prevents idle display and system sleep while QuietLock runs and is released when it quits. |
+| Automatic screen saver | `com.apple.screensaver` → `idleTime` (current user, current host) | Writing `0` disables it; the previous delay is saved and restored (20 minutes if none was recorded). Read back after writing. |
+
+- Every write is verified by reading the real value back. A cancelled or partial change shows the actual state and never reports success.
+- If another app or System Settings changes display sleep, QuietLock shows the new value and stops keeping the Mac awake instead of fighting the change.
+- Settings stay in place after QuietLock quits; only the keep-awake assertion ends.
+- **Never** does not prevent manual locking, closing the lid, low-battery sleep or managed policies. Screen saver settings enforced by an organization are shown as managed and cannot be changed.
+
+## Privileges and security
+
+`pmset` must run as root. QuietLock never stores your password and installs no background service.
+
+- **First change after launch:** a standard macOS administrator prompt (`do shell script … with administrator privileges`) applies the change and installs `/etc/sudoers.d/quietlock`. The rule is validated with `visudo -c` and installed as `0440 root:wheel`; if validation fails, the rule is skipped and the change still applies.
+- **Scope of the rule:** the current user may run exactly seven commands without a password — `pmset -a displaysleep` with `1`, `5`, `10`, `15`, `30` or `0`, and `rm -f /etc/sudoers.d/quietlock`. Nothing else is allowed. User names containing spaces, quotes, commas or other unsafe characters never get a rule.
+- **Later changes:** `sudo -n` (which never prompts). If the rule has been removed, QuietLock asks again.
+- **Revocation:** the authorization is remembered in memory only, so every launch asks once. On quit, including logout and shutdown, the rule removes itself. A rule left behind by a crash is removed on the next launch, or manually with `sudo rm /etc/sudoers.d/quietlock`.
+
+> [!IMPORTANT]
+> While QuietLock is running (or after a crash until the next launch), any process running as your user can change display sleep to one of the six presets without a password.
+
+## Building from source
+
+Requires macOS 14 or later and Xcode 15 or later. No third-party dependencies.
 
 ```sh
-bash scripts/build.sh
+bash scripts/test.sh          # unit tests (mocked services; no settings are changed)
+bash scripts/build.sh         # universal app → .build/QuietLock.app (ad-hoc signed)
+bash scripts/package-dmg.sh   # drag-to-install DMG → dist/QuietLock.dmg + .sha256
+bash scripts/preview.sh       # render panel states → .build/previews/{en,zh-Hans}/ (run build.sh first)
 ```
 
-产物：`.build/QuietLock.app`（供打包 DMG 使用的中间产物），包含 Apple Silicon 与 Intel 两种架构。构建脚本进行本机临时签名，无需开发者证书。也可直接用 Xcode 打开 `QuietLock.xcodeproj`，选择 QuietLock scheme 运行。
+You can also open `QuietLock.xcodeproj` in Xcode and run the **QuietLock** scheme.
 
-本机版本未做 Developer ID 签名和 Apple 公证。对外分发时应配置自己的 bundle identifier、开发者签名与公证。
+- The unit tests use mock executors and stores. Two read-only checks also read the live `pmset` and screen saver values.
+- `package-dmg.sh` needs Python 3.10+. On first run it installs pinned versions of `dmgbuild`, `ds-store` and `mac-alias` into `.build/dmg-venv/`; they are used only for packaging. Pass `--skip-build` to reuse an up-to-date `.build/QuietLock.app`.
+- The app icon and the menu bar icon share one vector master (`QuietLock/BrandMark.swift`). `build.sh` regenerates `AppIcon.icns` when its sources change.
 
-### 打包拖动安装 DMG
+For distribution under your own name, set your bundle identifier, sign with a Developer ID and notarize the app.
 
-```sh
-bash scripts/package-dmg.sh
+## Releasing
+
+1. Bump `CFBundleShortVersionString` in `QuietLock/Info.plist` and commit.
+2. Run `bash scripts/release.sh`.
+
+The script checks that you are on a clean `main` and that the version tag is new, runs the tests, then pushes `main` and `v<version>` in a single atomic push. The [release workflow](.github/workflows/release.yml) on a `macos-26` runner checks that the tag matches the app version, runs the tests, builds the DMG and publishes it with its checksum. If a step fails, `scripts/ci-annotate.sh` posts the failing lines as an error annotation that you can read without signing in.
+
+## Project structure
+
+```
+QuietLock/                  SwiftUI panel, AppKit status item, accessible slider, brand mark
+Sources/QuietLockCore/      Swift package: parsers, system services, state models
+Tests/QuietLockCoreTests/   Unit tests (no real authorization or writes)
+Tools/                      Icon, DMG artwork and preview renderers; dmgbuild settings
+scripts/                    test, build, package, preview, release, CI helpers
+.github/workflows/          Tag-triggered release pipeline
+docs/                       Icon and screenshots (en/, zh-Hans/)
 ```
 
-脚本先构建通用版应用，再生成 `dist/QuietLock.dmg` 及 SHA-256 校验文件。安装窗口包含应用、指向 `/Applications` 的快捷入口和 Retina 品牌背景，无需安装器或管理员权限即可拖动安装（系统文件夹写入权限仍由 macOS 决定）。`dist/` 只包含这两个分发文件。已有最新的 `.build/QuietLock.app` 时，可以添加 `--skip-build` 跳过编译。
+## Changelog
 
-DMG 打包额外需要 Python 3.10+，首次运行会联网将固定版本的 `dmgbuild`、`ds-store` 和 `mac-alias` 安装到 `.build/dmg-venv/`。这些依赖仅用于打包，不会包含在应用中。布局直接写入 `.DS_Store`，无需控制 Finder。打包过程不会更改本机电源设置。
-
-重新生成图标：
-
-```sh
-xcrun swiftc -parse-as-library QuietLock/BrandMark.swift QuietLock/VisualEffectView.swift Tools/GenerateIcon.swift -o .build/GenerateIcon
-.build/GenerateIcon .build/AppIcon.iconset
-iconutil -c icns .build/AppIcon.iconset -o QuietLock/AppIcon.icns
-```
-
-### 发布到 GitHub Releases
-
-```sh
-bash scripts/release.sh
-```
-
-先把 `QuietLock/Info.plist` 的 `CFBundleShortVersionString` 改为新版本并提交。脚本会检查当前在 `main` 分支、工作区干净、该版本的 tag 尚不存在，然后在本机跑一遍测试，推送 `main` 并打上 `v<版本>` tag 推送。GitHub Actions（`.github/workflows/release.yml`，`macos-26` runner）收到 tag 后会核对 tag 与 Info.plist 版本、运行测试、打包 DMG，并把 `QuietLock.dmg` 和 `.sha256` 发布为 Release。测试或打包失败时，`scripts/ci-annotate.sh` 会把出错的行汇总成一条 GitHub 错误注解，不登录也能在运行页面看到。
-
-最新版固定下载地址：https://github.com/tianguzhe/QuietLock/releases/latest/download/QuietLock.dmg
-
-## 验证
-
-```sh
-bash scripts/test.sh
-```
-
-自动测试使用模拟执行器，不修改本机设置，覆盖解析、授权取消、写入失败、部分生效、回读不一致、重复提交与过期读取竞态。
-
-另外包含只读的真实进程验证：读取本机 `pmset` 设置，检查进程输出和退出码。
-
-生成原生视图预览（先运行构建脚本）：
-
-```sh
-bash scripts/preview.sh
-```
-
-图片保存在 `.build/previews/`。预览工具使用模拟数据，覆盖深浅色、首次指引、自定义时间、时间未统一、永不、授权中、读取失败、屏保读取失败及完整说明，并确认所有状态均为 344 × 420pt。
-
-`design-preview.png` 包含深浅色面板、应用图标和 18pt 状态栏图标预览。状态栏与应用图标共用矢量母版；构建脚本会在设计源文件更新后自动重新生成 ICNS。
-
-人工验收：
-
-- 打开/关闭面板，检查六个刻度、拖动预览、松手吸附和数字过渡。
-- 检查深色与浅色，以及系统“减少动态效果”“减少透明度”。
-- 首次设置指引可以关闭，并可随时从底部打开系统锁屏设置。
-- 在自行授权的一次真实修改后，以 `pmset -g custom` 检查各电源的 `displaysleep`；完成后按需恢复原值。
-- 取消授权时应显示原来的实际值，且不报告成功。授权期间不可重复提交。
-
-## 结构
-
-- `QuietLock/`：SwiftUI 面板、AppKit 状态栏容器、无障碍滑块。
-- `Sources/QuietLockCore/`：独立 Swift Package，包含解析器、系统服务和状态模型。
-- `Tests/QuietLockCoreTests/`：不调用实际授权命令的自动测试。
-- `QuietLock/BrandMark.swift`：应用、面板与状态栏共用的原创矢量图标。
-- `Tools/GenerateIcon.swift`：渐变应用图标的可重现绘制工具。
-- `Tools/GenerateDMGArtwork.swift`、`Tools/dmg-settings.py`：Retina 安装背景和 Finder 拖动安装布局。
-
-系统读取使用 `/usr/bin/pmset -g custom`；修改只允许预设枚举产生的整数进入 `/usr/bin/pmset -a displaysleep <分钟>`。应用不会保存管理员密码，也不会安装特权后台服务。
-
-### 免密调整
-
-每次启动后的第一次修改，通过 AppleScript 的 `with administrator privileges` 弹出一次系统授权，在同一授权内完成修改，并安装 `/etc/sudoers.d/quietlock`：仅允许当前用户免密执行 6 条固定命令（`displaysleep` 为 1、5、10、15、30、0）以及删除该规则本身。规则先经 `visudo -c` 校验，再以 `0440 root:wheel` 安装；校验失败时不安装，不影响本次修改。用户名含空格、引号、逗号等字符时不安装规则，每次仍会询问密码。
-
-本次运行内的后续修改执行 `sudo -n /usr/bin/pmset -a displaysleep <分钟>`（`-n` 不会询问密码）；规则若被移除，则重新弹出授权。“已授权”只记在内存中，因此每次启动都会重新询问。退出静锁（包括注销、关机触发的退出）时以 `sudo -n /bin/rm -f /etc/sudoers.d/quietlock` 删除规则；若因崩溃或强制退出残留，下次启动时会先清理。
-
-注意：静锁运行期间（或崩溃后到下次启动前），本机以该用户身份运行的任何程序都能不输密码把熄屏时间改为这 6 个值之一。也可执行 `sudo rm /etc/sudoers.d/quietlock` 手动撤销。
+- **1.4** — English and Simplified Chinese UI that follows the system language. Authorize once per launch, revoked on quit. Prominent status callout with a one-click screen saver fix. Accepts string-typed `idleTime` values. Keeps external-change warnings when the panel opens.
+- **1.3** — Compact fixed-size 344 × 420 pt panel with an in-panel guide.
+- **1.2** — Automatic screen saver switch; native keep-awake for ∞; periodic and wake-time sync.
+- **1.1** — Original Q-clock icon, glacier-teal glass design and haptic slider.

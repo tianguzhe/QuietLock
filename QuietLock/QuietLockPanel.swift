@@ -78,15 +78,17 @@ struct QuietLockPanel: View {
         HStack(spacing: 9) {
             BrandBadge().scaleEffect(0.9).frame(width: 32, height: 32)
             VStack(alignment: .leading, spacing: 3) {
-                Text("静锁").font(.system(size: 13, weight: .semibold))
-                Text("QUIETLOCK").font(.system(size: 8, weight: .medium, design: .monospaced))
+                Text(localized("QuietLock", "静锁")).font(.system(size: 13, weight: .semibold))
+                Text(localized("DISPLAY SLEEP", "QUIETLOCK")).font(.system(size: 8, weight: .medium, design: .monospaced))
                     .tracking(1.6)
                     .foregroundStyle(QuietLockStyle.secondaryText(colorScheme))
             }
             Spacer()
             HStack(spacing: 5) {
                 Circle().fill(statusColor).frame(width: 4, height: 4)
-                Text(model.isApplying ? "待授权" : !model.isSnapshotCurrent ? "未同步" : model.isKeepingAwake ? "保持唤醒" : "已同步")
+                Text(model.isApplying ? localized("Authorizing", "待授权")
+                     : !model.isSnapshotCurrent ? localized("Not synced", "未同步")
+                     : model.isKeepingAwake ? localized("Awake", "保持唤醒") : localized("Synced", "已同步"))
                     .font(.system(size: 10, weight: .medium))
             }
             .padding(.horizontal, 9).padding(.vertical, 5)
@@ -103,8 +105,8 @@ struct QuietLockPanel: View {
             }
             .buttonStyle(ChromeButtonStyle())
             .foregroundStyle(QuietLockStyle.secondaryText(colorScheme))
-            .help("使用说明")
-            .accessibilityLabel("使用说明")
+            .help(localized("Guide", "使用说明"))
+            .accessibilityLabel(localized("Guide", "使用说明"))
         }
     }
 
@@ -139,12 +141,14 @@ struct QuietLockPanel: View {
     }
 
     private var cardCaption: String {
-        if preview != nil { return "松开或按回车，应用新时间" }
-        if model.isApplying { return "正在等待系统授权…" }
-        if !model.isSnapshotCurrent { return model.isRefreshing ? "正在读取系统设置…" : "当前设置未知" }
-        if model.snapshot?.uniformMinutes == nil { return "电源时间未统一 · 选择档位即可统一" }
-        if model.snapshot?.preset == nil { return "系统自定义时间 · 选择档位即可修改" }
-        return "电池与接电 · 统一设置"
+        if preview != nil { return localized("Release or press Return to apply", "松开或按回车，应用新时间") }
+        if model.isApplying { return localized("Waiting for authorization…", "正在等待系统授权…") }
+        if !model.isSnapshotCurrent {
+            return model.isRefreshing ? localized("Reading system settings…", "正在读取系统设置…") : localized("Current setting unknown", "当前设置未知")
+        }
+        if model.snapshot?.uniformMinutes == nil { return localized("Power sources differ · pick a step to match", "电源时间未统一 · 选择档位即可统一") }
+        if model.snapshot?.preset == nil { return localized("Custom value · pick a step to change", "系统自定义时间 · 选择档位即可修改") }
+        return localized("Battery and AC · applied together", "电池与接电 · 统一设置")
     }
 
     private var statusColor: Color {
@@ -177,14 +181,14 @@ struct QuietLockPanel: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .help(statusText)
             if model.canRetry {
-                Button("重试") { Task { await model.retry() } }
+                Button(localized("Retry", "重试")) { Task { await model.retry() } }
                     .buttonStyle(CalloutActionStyle(tint: statusTint))
             } else if screenSaverHasError {
-                Button("重读") { Task { await screenSaver.refresh() } }
+                Button(localized("Reload", "重读")) { Task { await screenSaver.refresh() } }
                     .buttonStyle(CalloutActionStyle(tint: statusTint))
                     .disabled(screenSaver.isApplying || model.isApplying)
             } else if screenSaverDefeatsNever && screenSaver.canAdjust && !model.isApplying {
-                Button("关闭屏保") { Task { await screenSaver.setEnabled(false) } }
+                Button(localized("Turn Off", "关闭屏保")) { Task { await screenSaver.setEnabled(false) } }
                     .buttonStyle(CalloutActionStyle(tint: statusTint))
             } else if showsGuidance {
                 Button { hasReadLockGuidance = true } label: {
@@ -192,7 +196,7 @@ struct QuietLockPanel: View {
                 }
                 .buttonStyle(ChromeButtonStyle())
                 .foregroundStyle(QuietLockStyle.secondaryText(colorScheme))
-                .accessibilityLabel("知道了，关闭首次提示")
+                .accessibilityLabel(localized("Dismiss setup tip", "知道了，关闭首次提示"))
             }
         }
         .padding(.leading, 11)
@@ -228,22 +232,28 @@ struct QuietLockPanel: View {
     private var statusText: String {
         if model.isApplying || model.feedback?.kind == .error, let feedback = model.feedback { return feedback.message }
         if screenSaverHasError, let feedback = screenSaver.feedback { return feedback.message }
-        if screenSaver.isApplying { return "正在更新自动屏保设置…" }
-        if preview != nil { return "拖动实时预览，松开或按回车后提交。" }
-        if screenSaverDefeatsNever { return "自动屏保仍开启，闲置后仍可能锁屏。" }
+        if screenSaver.isApplying { return localized("Updating the screen saver…", "正在更新自动屏保设置…") }
+        if preview != nil { return localized("Previewing. Release or press Return to apply.", "拖动实时预览，松开或按回车后提交。") }
+        if screenSaverDefeatsNever {
+            return localized("The screen saver is on and can still lock your Mac.", "自动屏保仍开启，闲置后仍可能锁屏。")
+        }
         if let feedback = model.feedback { return feedback.message }
         if shownMinutes == 0 {
-            return model.isKeepingAwake ? "静锁运行时保持唤醒；仍可手动锁屏与合盖。" : "已关闭闲置熄屏定时，密码要求跟随系统。"
+            return model.isKeepingAwake
+                ? localized("Keeping your Mac awake while QuietLock runs. You can still lock it manually.", "静锁运行时保持唤醒；仍可手动锁屏与合盖。")
+                : localized("Idle display sleep is off. Password rules follow macOS.", "已关闭闲置熄屏定时，密码要求跟随系统。")
         }
         if let snapshot = model.snapshot, model.isSnapshotCurrent, snapshot.uniformMinutes == nil { return snapshot.detail }
-        if showsGuidance { return "首次使用：在锁屏设置中，将「需要密码」设为「立即」。" }
-        return "调整的是闲置熄屏时间，密码要求跟随系统。"
+        if showsGuidance {
+            return localized("First run: in Lock Screen settings, set Require password to Immediately.", "首次使用：在锁屏设置中，将「需要密码」设为「立即」。")
+        }
+        return localized("Sets idle display sleep. Password rules follow macOS.", "调整的是闲置熄屏时间，密码要求跟随系统。")
     }
 
     private var footer: some View {
         HStack(spacing: 6) {
             Button(action: openLockSettings) {
-                Label("锁屏设置", systemImage: "slider.horizontal.3")
+                Label(localized("Lock Screen", "锁屏设置"), systemImage: "slider.horizontal.3")
                     .font(.system(size: 11, weight: .medium))
                     .padding(.horizontal, 8).frame(height: 28)
             }
@@ -258,16 +268,16 @@ struct QuietLockPanel: View {
                 Image(systemName: "arrow.clockwise").font(.system(size: 11)).frame(width: 28, height: 28)
             }
             .buttonStyle(ChromeButtonStyle())
-            .help("重新读取系统设置")
-            .accessibilityLabel("重新读取系统设置")
+            .help(localized("Reload system settings", "重新读取系统设置"))
+            .accessibilityLabel(localized("Reload system settings", "重新读取系统设置"))
             .disabled(model.isApplying || screenSaver.isApplying)
             Button { NSApp.terminate(nil) } label: {
                 Image(systemName: "power").font(.system(size: 11)).frame(width: 28, height: 28)
             }
             .buttonStyle(ChromeButtonStyle())
             .disabled(model.isApplying || screenSaver.isApplying)
-            .help("退出静锁（保留设置，结束保持唤醒）")
-            .accessibilityLabel("退出静锁")
+            .help(localized("Quit QuietLock (settings stay, keep-awake ends)", "退出静锁（保留设置，结束保持唤醒）"))
+            .accessibilityLabel(localized("Quit QuietLock", "退出静锁"))
         }
         .foregroundStyle(QuietLockStyle.secondaryText(colorScheme))
         .padding(.horizontal, 14)
@@ -281,22 +291,25 @@ struct QuietLockPanel: View {
                     hasReadLockGuidance = true
                     page = .controls
                 } label: {
-                    Label("返回", systemImage: "chevron.left").font(.system(size: 11, weight: .medium))
+                    Label(localized("Back", "返回"), systemImage: "chevron.left").font(.system(size: 11, weight: .medium))
                         .padding(.horizontal, 6).frame(height: 28)
                 }
                 .buttonStyle(ChromeButtonStyle()).foregroundStyle(QuietLockStyle.accent)
                 Spacer()
-                Text("使用说明").font(.system(size: 13, weight: .semibold))
+                Text(localized("Guide", "使用说明")).font(.system(size: 13, weight: .semibold))
             }
             .padding(.bottom, 12)
 
             VStack(spacing: 8) {
-                helpSection("熄屏与锁屏", symbol: "lock.shield",
-                    text: "静锁设置闲置熄屏时间。要熄屏后立即锁定，请在系统设置中将「需要密码」设为「立即」。")
-                helpSection("永不与保持唤醒", symbol: "sun.max",
-                    text: "选择 ∞ 后，静锁运行期间保持唤醒。要避免屏保触发锁屏，请同时关闭自动屏保。手动锁屏、合盖、低电量仍由系统处理。")
-                helpSection("屏保与设置保留", symbol: "sparkles.tv",
-                    text: "开启屏保恢复原等待时间，无记录时为 20 分钟。退出静锁只结束保持唤醒，已写入的设置仍保留。")
+                helpSection(localized("Display sleep and locking", "熄屏与锁屏"), symbol: "lock.shield",
+                    text: localized("QuietLock sets idle display sleep. To lock when the display sleeps, set Require password to Immediately in System Settings.",
+                                    "静锁设置闲置熄屏时间。要熄屏后立即锁定，请在系统设置中将「需要密码」设为「立即」。"))
+                helpSection(localized("Never and keep-awake", "永不与保持唤醒"), symbol: "sun.max",
+                    text: localized("∞ keeps your Mac awake while QuietLock runs. Turn off the screen saver too so it can't lock. macOS still handles manual lock, the lid and low battery.",
+                                    "选择 ∞ 后，静锁运行期间保持唤醒。要避免屏保触发锁屏，请同时关闭自动屏保。手动锁屏、合盖、低电量仍由系统处理。"))
+                helpSection(localized("Screen saver and settings", "屏保与设置保留"), symbol: "sparkles.tv",
+                    text: localized("Turning the screen saver on restores its delay, or 20 minutes. Quitting only ends keep-awake; settings stay.",
+                                    "开启屏保恢复原等待时间，无记录时为 20 分钟。退出静锁只结束保持唤醒，已写入的设置仍保留。"))
             }
 
             Spacer(minLength: 10)
@@ -304,21 +317,21 @@ struct QuietLockPanel: View {
             HStack(spacing: 5) {
                 keycap("←")
                 keycap("→")
-                Text("预览").padding(.trailing, 6)
+                Text(localized("Preview", "预览")).padding(.trailing, 6)
                 keycap("↩")
-                Text("应用").padding(.trailing, 6)
+                Text(localized("Apply", "应用")).padding(.trailing, 6)
                 keycap("esc")
-                Text("取消")
+                Text(localized("Cancel", "取消"))
             }
             .font(.system(size: 10))
             .foregroundStyle(QuietLockStyle.secondaryText(colorScheme))
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("方向键预览，回车应用，Esc 取消")
+            .accessibilityLabel(localized("Arrow keys preview, Return applies, Esc cancels", "方向键预览，回车应用，Esc 取消"))
             .padding(.bottom, 10)
 
             Button(action: openLockSettings) {
                 HStack {
-                    Text("打开系统锁屏设置")
+                    Text(localized("Open Lock Screen Settings", "打开系统锁屏设置"))
                     Spacer()
                     Image(systemName: "arrow.up.right")
                 }
