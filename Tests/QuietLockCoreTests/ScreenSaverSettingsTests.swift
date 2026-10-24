@@ -100,6 +100,17 @@ final class ScreenSaverServiceTests: XCTestCase {
         } catch { XCTAssertEqual(error as? ScreenSaverSettingsError, .verificationMismatch) }
     }
 
+    func testIdleTimeAcceptsIntegersAndNumericStrings() {
+        // `defaults -currentHost write com.apple.screensaver idleTime 0` (no -int) stores a string.
+        XCTAssertEqual(ScreenSaverIdlePreference.seconds(from: NSNumber(value: 300)), 300)
+        XCTAssertEqual(ScreenSaverIdlePreference.seconds(from: "0" as NSString), 0)
+        XCTAssertEqual(ScreenSaverIdlePreference.seconds(from: "600" as NSString), 600)
+        for invalid: CFPropertyList in ["-1" as NSString, "abc" as NSString, "" as NSString,
+                                        NSNumber(value: 1.5), kCFBooleanTrue, [1] as NSArray] {
+            XCTAssertNil(ScreenSaverIdlePreference.seconds(from: invalid), "\(invalid)")
+        }
+    }
+
     func testLivePreferencesAreReadOnly() async throws {
         let actual = try await SystemScreenSaverSettingsService().read()
         XCTAssertGreaterThanOrEqual(actual.idleSeconds, 0)

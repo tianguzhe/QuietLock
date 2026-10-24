@@ -34,6 +34,24 @@ protocol ScreenSaverPreferenceStoring: Sendable {
     func saveIdleSeconds(_ seconds: Int) async
 }
 
+enum ScreenSaverIdlePreference {
+    /// Accepts integer numbers and numeric strings: the common
+    /// `defaults -currentHost write com.apple.screensaver idleTime 0` (no `-int`) stores a string.
+    /// Booleans, fractions, negatives and other types are rejected.
+    static func seconds(from value: CFPropertyList) -> Int? {
+        let text: String
+        if CFGetTypeID(value) == CFNumberGetTypeID(), let number = value as? NSNumber {
+            text = number.stringValue
+        } else if CFGetTypeID(value) == CFStringGetTypeID(), let string = value as? String {
+            text = string.trimmingCharacters(in: .whitespaces)
+        } else {
+            return nil
+        }
+        guard let seconds = Int(text), seconds >= 0 else { return nil }
+        return seconds
+    }
+}
+
 /// idleTime is a per-user, per-host setting. A missing value uses macOS's
 /// 20-minute default; writing zero disables only the automatic screen saver.
 private actor SystemScreenSaverPreferenceStore: ScreenSaverPreferenceStoring {
@@ -49,8 +67,7 @@ private actor SystemScreenSaverPreferenceStore: ScreenSaverPreferenceStoring {
             ?? CFPreferencesCopyAppValue(idleKey, domain)
         var seconds = 20 * 60
         if let value {
-            guard CFGetTypeID(value) == CFNumberGetTypeID(), let number = value as? NSNumber,
-                  let parsed = Int(number.stringValue), parsed >= 0 else {
+            guard let parsed = ScreenSaverIdlePreference.seconds(from: value) else {
                 throw ScreenSaverSettingsError.readFailed
             }
             seconds = parsed
