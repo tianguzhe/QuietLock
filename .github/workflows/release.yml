@@ -1,0 +1,37 @@
+name: Release DMG
+
+# Pushing a tag such as v1.4.0 builds, tests and publishes dist/QuietLock.dmg as a GitHub Release.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check tag matches app version
+        run: |
+          version=$(/usr/bin/plutil -extract CFBundleShortVersionString raw -o - QuietLock/Info.plist)
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match Info.plist version $version"
+            exit 1
+          fi
+
+      - name: Test
+        run: bash scripts/test.sh
+
+      - name: Build DMG
+        run: bash scripts/package-dmg.sh
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/QuietLock.dmg dist/QuietLock.dmg.sha256 \
+            --verify-tag --title "静锁 QuietLock $GITHUB_REF_NAME" --generate-notes

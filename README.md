@@ -8,6 +8,8 @@
 
 1.3 版重做紧凑界面，固定为 **344 × 420pt**。横向时间卡片、六档滑块、自动屏保开关、错误重试、系统设置、刷新与退出均在首屏内；首次指引和保持唤醒提示复用固定状态区。右上角「ⓘ」可打开完整说明，切换页面不会改变面板高度。AppKit 托管视图和弹出窗口使用相同尺寸，避免首次展开或状态更新时裁切底部内容。
 
+1.4 版每次启动后只需授权一次，运行期间调整熄屏时间不再询问密码，退出时自动撤销；状态区改为醒目提示条，“永不”时若自动屏保仍开启可一键关闭；修复打开面板时丢失后台检测到的设置变更提示。
+
 ## 使用
 
 1. 打开 `dist/QuietLock.dmg`，将左侧 QuietLock 拖入右侧 Applications 文件夹，然后从“应用程序”打开静锁并推出磁盘映像。应用仅显示在菜单栏，不显示 Dock 图标。更新前请先退出旧版，再拖入并替换。
@@ -53,6 +55,16 @@ xcrun swiftc -parse-as-library QuietLock/BrandMark.swift QuietLock/VisualEffectV
 .build/GenerateIcon .build/AppIcon.iconset
 iconutil -c icns .build/AppIcon.iconset -o QuietLock/AppIcon.icns
 ```
+
+### 发布到 GitHub Releases
+
+```sh
+bash scripts/release.sh
+```
+
+先把 `QuietLock/Info.plist` 的 `CFBundleShortVersionString` 改为新版本并提交。脚本会检查当前在 `main` 分支、工作区干净、该版本的 tag 尚不存在，然后在本机跑一遍测试，推送 `main` 并打上 `v<版本>` tag 推送。GitHub Actions（`.github/workflows/release.yml`，`macos-26` runner）收到 tag 后会核对 tag 与 Info.plist 版本、运行测试、打包 DMG，并把 `QuietLock.dmg` 和 `.sha256` 发布为 Release。
+
+最新版固定下载地址：https://github.com/tianguzhe/QuietLock/releases/latest/download/QuietLock.dmg
 
 ## 验证
 
