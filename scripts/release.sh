@@ -26,7 +26,7 @@ fi
 # Fail fast locally instead of waiting for CI.
 bash scripts/test.sh
 
-git tag -a "$QUIETLOCK_TAG" -m "静锁 QuietLock $QUIETLOCK_TAG"
+git tag -a "$QUIETLOCK_TAG" -m "QuietLock $QUIETLOCK_TAG"
 # One atomic push: main and the tag land together or not at all.
 if ! git push --atomic origin main "refs/tags/$QUIETLOCK_TAG"; then
     git tag -d "$QUIETLOCK_TAG" >/dev/null

@@ -34,4 +34,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" dist/QuietLock.dmg dist/QuietLock.dmg.sha256 \
-            --verify-tag --title "静锁 QuietLock $GITHUB_REF_NAME" --generate-notes
+            --verify-tag --title "QuietLock $GITHUB_REF_NAME" --generate-notes

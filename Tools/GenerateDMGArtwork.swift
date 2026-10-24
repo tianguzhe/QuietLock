@@ -70,9 +70,9 @@ struct GenerateDMGArtwork {
         cg.setLineCap(.round)
         cg.setLineJoin(.round)
         cg.strokePath()
-        text("静锁 QuietLock", in: NSRect(x: 101, y: 36, width: 370, height: 35),
+        text("QuietLock", in: NSRect(x: 101, y: 36, width: 370, height: 35),
              font: .systemFont(ofSize: 26, weight: .semibold), color: .white)
-        text("让每一次离开，都安心。", in: NSRect(x: 41, y: 96, width: 430, height: 22),
+        text("Step away with peace of mind.", in: NSRect(x: 41, y: 96, width: 430, height: 22),
              font: .systemFont(ofSize: 12), color: color(0.66, 0.78, 0.80))
 
         let versionRect = NSRect(x: 527, y: 43, width: 73, height: 25)
@@ -82,7 +82,7 @@ struct GenerateDMGArtwork {
              font: .monospacedSystemFont(ofSize: 10, weight: .medium),
              color: color(0.63, 0.80, 0.78), alignment: .center)
 
-        text("将 QuietLock 拖入右侧文件夹", in: NSRect(x: 40, y: 161, width: 560, height: 24),
+        text("Drag QuietLock to Applications", in: NSRect(x: 40, y: 145, width: 560, height: 24),
              font: .systemFont(ofSize: 14, weight: .medium), color: ink, alignment: .center)
 
         // These halos align with the Finder icon centres in dmg-settings.py.
@@ -109,7 +109,7 @@ struct GenerateDMGArtwork {
         cg.strokePath()
         cg.restoreGState()
 
-        text("拖动安装", in: NSRect(x: 272, y: 260, width: 96, height: 20),
+        text("Drag to install", in: NSRect(x: 272, y: 260, width: 96, height: 20),
              font: .systemFont(ofSize: 10, weight: .medium), color: secondary, alignment: .center)
 
         cg.setStrokeColor(color(0.15, 0.35, 0.34).withAlphaComponent(0.12).cgColor)
@@ -117,9 +117,9 @@ struct GenerateDMGArtwork {
         cg.move(to: CGPoint(x: 40, y: 355))
         cg.addLine(to: CGPoint(x: 600, y: 355))
         cg.strokePath()
-        text("安装后，打开应用，从屏幕顶部的 Q 图标开始。", in: NSRect(x: 40, y: 373, width: 560, height: 22),
+        text("After installing, open QuietLock and click the Q icon in the menu bar.", in: NSRect(x: 40, y: 373, width: 560, height: 22),
              font: .systemFont(ofSize: 12), color: secondary, alignment: .center)
-        text("macOS 14+   ·   Apple Silicon 与 Intel", in: NSRect(x: 40, y: 406, width: 560, height: 18),
+        text("macOS 14+   ·   Apple Silicon & Intel", in: NSRect(x: 40, y: 406, width: 560, height: 18),
              font: .systemFont(ofSize: 10), color: secondary.withAlphaComponent(0.8), alignment: .center)
 
         NSGraphicsContext.restoreGraphicsState()

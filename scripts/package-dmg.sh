@@ -51,7 +51,7 @@ printf 'Creating drag-to-install disk image…\n'
     -D "app=$QUIETLOCK_APP" \
     -D "icon=$QUIETLOCK_ROOT/QuietLock/AppIcon.icns" \
     -D "background=$QUIETLOCK_DMG_WORK/background.tiff" \
-    '静锁 QuietLock' "$QUIETLOCK_DMG_WORK/QuietLock.dmg"
+    'QuietLock' "$QUIETLOCK_DMG_WORK/QuietLock.dmg"
 
 /usr/bin/hdiutil verify "$QUIETLOCK_DMG_WORK/QuietLock.dmg"
 /bin/mv -f "$QUIETLOCK_DMG_WORK/QuietLock.dmg" "$QUIETLOCK_ROOT/dist/QuietLock.dmg"
