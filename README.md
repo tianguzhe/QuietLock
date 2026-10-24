@@ -62,7 +62,7 @@ iconutil -c icns .build/AppIcon.iconset -o QuietLock/AppIcon.icns
 bash scripts/release.sh
 ```
 
-先把 `QuietLock/Info.plist` 的 `CFBundleShortVersionString` 改为新版本并提交。脚本会检查当前在 `main` 分支、工作区干净、该版本的 tag 尚不存在，然后在本机跑一遍测试，推送 `main` 并打上 `v<版本>` tag 推送。GitHub Actions（`.github/workflows/release.yml`，`macos-26` runner）收到 tag 后会核对 tag 与 Info.plist 版本、运行测试、打包 DMG，并把 `QuietLock.dmg` 和 `.sha256` 发布为 Release。
+先把 `QuietLock/Info.plist` 的 `CFBundleShortVersionString` 改为新版本并提交。脚本会检查当前在 `main` 分支、工作区干净、该版本的 tag 尚不存在，然后在本机跑一遍测试，推送 `main` 并打上 `v<版本>` tag 推送。GitHub Actions（`.github/workflows/release.yml`，`macos-26` runner）收到 tag 后会核对 tag 与 Info.plist 版本、运行测试、打包 DMG，并把 `QuietLock.dmg` 和 `.sha256` 发布为 Release。测试或打包失败时，`scripts/ci-annotate.sh` 会把出错的行汇总成一条 GitHub 错误注解，不登录也能在运行页面看到。
 
 最新版固定下载地址：https://github.com/tianguzhe/QuietLock/releases/latest/download/QuietLock.dmg
 

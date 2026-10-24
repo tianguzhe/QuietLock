@@ -24,10 +24,10 @@ jobs:
           fi
 
       - name: Test
-        run: bash scripts/test.sh
+        run: bash scripts/ci-annotate.sh Test bash scripts/test.sh
 
       - name: Build DMG
-        run: bash scripts/package-dmg.sh
+        run: bash scripts/ci-annotate.sh "Build DMG" bash scripts/package-dmg.sh
 
       - name: Publish release
         env:

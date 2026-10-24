@@ -17,8 +17,8 @@ if [ -n "$(git status --porcelain)" ]; then
     printf 'Commit or stash changes before releasing.\n' >&2
     exit 1
 fi
-if git rev-parse -q --verify "refs/tags/$QUIETLOCK_TAG" >/dev/null ||
-    [ -n "$(git ls-remote --tags origin "refs/tags/$QUIETLOCK_TAG")" ]; then
+# A tag that exists only on the remote is caught by the push below, which keeps this to one SSH connection.
+if git rev-parse -q --verify "refs/tags/$QUIETLOCK_TAG" >/dev/null; then
     printf '%s already exists. Bump CFBundleShortVersionString in QuietLock/Info.plist first.\n' "$QUIETLOCK_TAG" >&2
     exit 1
 fi
@@ -26,9 +26,13 @@ fi
 # Fail fast locally instead of waiting for CI.
 bash scripts/test.sh
 
-git push origin main
 git tag -a "$QUIETLOCK_TAG" -m "静锁 QuietLock $QUIETLOCK_TAG"
-git push origin "$QUIETLOCK_TAG"
+# One atomic push: main and the tag land together or not at all.
+if ! git push --atomic origin main "refs/tags/$QUIETLOCK_TAG"; then
+    git tag -d "$QUIETLOCK_TAG" >/dev/null
+    printf 'Push failed; removed local %s so the release can be retried.\n' "$QUIETLOCK_TAG" >&2
+    exit 1
+fi
 
 QUIETLOCK_REPO=$(git remote get-url origin | sed -E 's#^(git@github.com:|https://github.com/)##; s#\.git$##')
 printf '\nPushed %s. Build progress: https://github.com/%s/actions\n' "$QUIETLOCK_TAG" "$QUIETLOCK_REPO"
